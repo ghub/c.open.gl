@@ -1,17 +1,23 @@
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
 
+#include <GLFW/glfw3.h>
+#include <SOIL/SOIL.h>
+
+// Shader sources
 const GLchar* vertexSource = " \
 #version 150\n \
  \
 in vec2 position; \
 in vec3 color; \
+in vec2 texcoord; \
  \
 out vec3 Color; \
+out vec2 Texcoord; \
  \
 void main() \
 { \
     Color = color; \
+    Texcoord = texcoord; \
     gl_Position = vec4(position, 0.0, 1.0); \
 } \
 ";
@@ -20,12 +26,18 @@ const GLchar* fragmentSource = " \
 #version 150\n \
  \
 in vec3 Color; \
+in vec2 Texcoord; \
  \
 out vec4 outColor; \
  \
+uniform sampler2D texKitten; \
+uniform sampler2D texPuppy; \
+ \
 void main() \
 { \
-    outColor = vec4(Color, 1.0); \
+    vec4 colKitten = texture(texKitten, Texcoord); \
+    vec4 colPuppy = texture(texPuppy, Texcoord); \
+    outColor = mix(colKitten, colPuppy, 0.5) * vec4(Color, 1.0); \
 } \
 ";
 
@@ -55,13 +67,15 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
     float vertices[] = {
-        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,
+    //  Position      Color             Texcoords
+        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Top-right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, // Bottom-right
+        -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, // Bottom-left
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // Create an element array
     GLuint ebo;
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -91,7 +105,7 @@ int main()
     glUseProgram(shaderProgram);
 
     // Specify the layout of the vertex data
-    const int stride = 5 * sizeof(float);
+    const int stride = 7 * sizeof(float);
 
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
@@ -101,16 +115,40 @@ int main()
     glEnableVertexAttribArray(colAttrib);
     glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(2 * sizeof(float)));
 
-    GLuint tex;
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+    GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
+    glEnableVertexAttribArray(texAttrib);
+    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, stride, (void*)(5 * sizeof(float)));
+
+    // Load texture
+    GLuint textures[2];
+    glGenTextures(1, textures);
+
+    int width, height;
+    unsigned char* image;
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
+    image = SOIL_load_image("sample.png", &width, &height, 0, SOIL_LOAD_RGB);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    SOIL_free_image_data(image);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texKitten"), 0);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
+    image = SOIL_load_image("sample2.png", &width, &height, 0, SOIL_LOAD_RGB);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    SOIL_free_image_data(image);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texPuppy"), 1);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -130,10 +168,13 @@ int main()
         glfwSwapBuffers(window);
     }
 
+    glDeleteTextures(2, textures);
+
     glDeleteProgram(shaderProgram);
     glDeleteShader(fragmentShader);
     glDeleteShader(vertexShader);
 
+    glDeleteBuffers(1, &ebo);
     glDeleteBuffers(1, &vbo);
 
     glDeleteVertexArrays(1, &vao);
