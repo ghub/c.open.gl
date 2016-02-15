@@ -7,6 +7,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(OpenGL REQUIRED)
 
 macro(link_to_library PROJNAME LIBNAME)
     include_directories(${${LIBNAME}_INCLUDE_DIR})
@@ -14,3 +15,4 @@ macro(link_to_library PROJNAME LIBNAME)
 endmacro()
 
 add_subdirectory(ch2)
+add_subdirectory(ch3)
