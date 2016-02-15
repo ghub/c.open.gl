@@ -1,5 +1,6 @@
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include <GL/glew.h>
 
@@ -59,13 +60,15 @@ int main()
 
     // Create and compile the vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    const GLchar* vertexSource = readVertexSource().c_str();
+    std::string shaderSource = readVertexSource();
+    const GLchar* vertexSource = shaderSource.c_str();
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     glCompileShader(vertexShader);
 
     // Create and compile the fragment shader
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    const GLchar* fragmentSource = readFragmentSource().c_str();
+    shaderSource = readFragmentSource();
+    const GLchar* fragmentSource = shaderSource.c_str();
     glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
     glCompileShader(fragmentShader);
 
