@@ -32,3 +32,8 @@ add_executable(ex3_2 ex3_2.cpp)
 link_to_library(ex3_2 GLEW)
 link_to_library(ex3_2 GLFW3)
 link_to_library(ex3_2 OPENGL)
+
+add_executable(ex3_3 ex3_3.cpp)
+link_to_library(ex3_3 GLEW)
+link_to_library(ex3_3 GLFW3)
+link_to_library(ex3_3 OPENGL)
