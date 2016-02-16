@@ -1,3 +1,5 @@
+#include <chrono>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -6,7 +8,7 @@
 
 #include <GLFW/glfw3.h>
 
-const std::string BASE("ch3/ch3_1.");
+const std::string BASE("ch3/ch3_2.");
 
 std::string readShaderSource(const char* const ext)
 {
@@ -85,6 +87,11 @@ int main()
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
+    GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
+    glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
+
+    auto t_start = std::chrono::high_resolution_clock::now();
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -97,6 +104,10 @@ int main()
         // Clear the screen to black
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        auto t_now = std::chrono::high_resolution_clock::now();
+        float time = std::chrono::duration_cast<std::chrono::duration<float>>(t_now - t_start).count();
+        glUniform3f(uniColor, (std::sin(time * 4.0f) + 1.0f) / 2.0f, 0.0f, 0.0f);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 

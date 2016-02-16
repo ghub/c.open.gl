@@ -2,3 +2,9 @@ add_executable(ch3_1 ch3_1.cpp)
 link_to_library(ch3_1 GLEW)
 link_to_library(ch3_1 GLFW3)
 link_to_library(ch3_1 OPENGL)
+
+add_executable(ch3_2 ch3_2.cpp)
+link_to_library(ch3_2 GLEW)
+link_to_library(ch3_2 GLFW3)
+link_to_library(ch3_2 OPENGL)
+
