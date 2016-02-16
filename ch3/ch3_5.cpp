@@ -6,7 +6,7 @@
 
 #include <GLFW/glfw3.h>
 
-const std::string BASE("ch3/ch3_1.");
+const std::string BASE("ch3/ch3_5.");
 
 std::string readShaderSource(const char* const ext)
 {
@@ -52,11 +52,23 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
     float vertices[] = {
-         0.0f,  0.5f, // Vertex 1 (X, Y)
-         0.5f, -0.5f, // Vertex 2 (X, Y)
-        -0.5f, -0.5f, // Vertex 3 (X, Y)
+        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Top-left
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Top-right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right
+        -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, // Bottom-left
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Create an element array
+    GLuint ebo;
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+    GLuint elements[] = {
+        0, 1, 2,
+        2, 3, 0,
+    };
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
     // Create and compile the vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -81,9 +93,15 @@ int main()
     glUseProgram(shaderProgram);
 
     // Specify the layout of the vertex data
+    const int stride = 5 * sizeof(float);
+
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, stride, 0);
+
+    GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
+    glEnableVertexAttribArray(colAttrib);
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, stride, (void*)(2 * sizeof(float)));
 
     while (!glfwWindowShouldClose(window))
     {
@@ -98,7 +116,7 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
     }
@@ -107,6 +125,7 @@ int main()
     glDeleteShader(fragmentShader);
     glDeleteShader(vertexShader);
 
+    glDeleteBuffers(1, &ebo);
     glDeleteBuffers(1, &vbo);
 
     glDeleteVertexArrays(1, &vao);

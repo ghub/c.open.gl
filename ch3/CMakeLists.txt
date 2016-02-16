@@ -17,3 +17,8 @@ add_executable(ch3_4 ch3_4.cpp)
 link_to_library(ch3_4 GLEW)
 link_to_library(ch3_4 GLFW3)
 link_to_library(ch3_4 OPENGL)
+
+add_executable(ch3_5 ch3_5.cpp)
+link_to_library(ch3_5 GLEW)
+link_to_library(ch3_5 GLFW3)
+link_to_library(ch3_5 OPENGL)
