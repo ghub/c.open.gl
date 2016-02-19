@@ -58,7 +58,10 @@ int main()
          0.5f, -0.5f, // Vertex 2 (X, Y)
         -0.5f, -0.5f, // Vertex 3 (X, Y)
     };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    int bytes = sizeof(vertices);
+    int rows = 3;
+    int stride = bytes / rows;
+    glBufferData(GL_ARRAY_BUFFER, bytes, vertices, GL_STATIC_DRAW);
 
     // Create and compile the vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -85,7 +88,7 @@ int main()
     // Specify the layout of the vertex data
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, stride, 0);
 
     GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
     glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
@@ -109,7 +112,7 @@ int main()
         float time = std::chrono::duration_cast<std::chrono::duration<float>>(t_now - t_start).count();
         glUniform3f(uniColor, (std::sin(time * 4.0f) + 1.0f) / 2.0f, 0.0f, 0.0f);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, rows);
 
         glfwSwapBuffers(window);
     }

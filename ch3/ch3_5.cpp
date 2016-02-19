@@ -57,7 +57,10 @@ int main()
          0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right
         -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, // Bottom-left
     };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    int bytes = sizeof(vertices);
+    int rows = 4;
+    int stride = bytes / rows;
+    glBufferData(GL_ARRAY_BUFFER, bytes, vertices, GL_STATIC_DRAW);
 
     // Create an element array
     GLuint ebo;
@@ -93,8 +96,6 @@ int main()
     glUseProgram(shaderProgram);
 
     // Specify the layout of the vertex data
-    const int stride = 5 * sizeof(float);
-
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, stride, 0);
@@ -116,7 +117,7 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
     }
