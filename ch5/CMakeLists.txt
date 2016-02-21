@@ -1,0 +1,6 @@
+add_executable(ch5_1 ch5_1.cpp)
+link_to_library(ch5_1 GLEW)
+link_to_library(ch5_1 GLFW3)
+link_to_library(ch5_1 GLM)
+link_to_library(ch5_1 OPENGL)
+link_to_library(ch5_1 SOIL)
